@@ -13,9 +13,10 @@ import { getOutline, jumpToHeading } from "./editor/outline";
 import type { OutlineItem } from "./editor/outline";
 import { useAppStore } from "./state/store";
 import { saveActiveDoc } from "./state/save";
-import { pickFolder, readDir, readFile } from "./lib/fsBridge";
+import { pickFolder, readDir, readFile, createFile } from "./lib/fsBridge";
 import { startWatching } from "./lib/watch";
 import { applyTheme } from "./theme/applyTheme";
+import { nextUntitledName } from "./state/newDoc";
 import { wordStats } from "./lib/wordcount";
 import { openSettings } from "./lib/windows";
 import { onSettingsChanged } from "./settings/settingsBridge";
@@ -58,20 +59,42 @@ function App() {
     if (editor) setOutline(getOutline(editor));
   }, [editor, markdown, activePath]);
 
-  // Global keyboard shortcuts: ⌘S save, ⌘K palette toggle, Esc closes palette.
+  // Global keyboard shortcuts. The effect has [] deps so it binds once; every
+  // handler reads fresh state via useAppStore.getState() rather than closing over
+  // stale render values.
+  //   ⌘S   save            ⌘N    new document       ⌘\\   toggle sidebar
+  //   ⌘K   palette toggle  ⌘⇧L  switch theme        ⌘⌥O  toggle outline
+  //   ⌘⇧F focus mode       ⌘,   settings            Esc   close palette
+  // ⌘⌥O matches e.code === "KeyO": on macOS, holding Option remaps e.key
+  // (Option+O → "ø"), so e.key would never equal "o". The physical-key code is
+  // unaffected by Option. The other shortcuts use e.key. ⌘⇧F and ⌘⇧L don't
+  // collide because they test different letters.
   useEffect(() => {
     function handleKeydown(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key === "s") {
+      const mod = e.metaKey || e.ctrlKey;
+      if (mod && e.key === "s") {
         e.preventDefault();
         void saveActiveDoc();
-      } else if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+      } else if (mod && e.key === "n") {
+        e.preventDefault();
+        void handleNew();
+      } else if (mod && e.key === "k") {
         e.preventDefault();
         const open = useAppStore.getState().ui.paletteOpen;
         useAppStore.getState().setPalette(!open);
-      } else if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === "f") {
+      } else if (mod && e.shiftKey && e.key.toLowerCase() === "f") {
         e.preventDefault();
         useAppStore.getState().toggleFocus();
-      } else if ((e.metaKey || e.ctrlKey) && e.key === ",") {
+      } else if (mod && e.shiftKey && e.key.toLowerCase() === "l") {
+        e.preventDefault();
+        handleToggleTheme();
+      } else if (mod && e.altKey && e.code === "KeyO") {
+        e.preventDefault();
+        useAppStore.getState().toggleOutline();
+      } else if (mod && e.key === "\\") {
+        e.preventDefault();
+        useAppStore.getState().toggleSidebar();
+      } else if (mod && e.key === ",") {
         e.preventDefault();
         void openSettings();
       } else if (e.key === "Escape" && useAppStore.getState().ui.paletteOpen) {
@@ -80,6 +103,7 @@ function App() {
     }
     window.addEventListener("keydown", handleKeydown);
     return () => window.removeEventListener("keydown", handleKeydown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Detach the active fs-change watcher when the app unmounts.
@@ -113,15 +137,39 @@ function App() {
     useAppStore.getState().openDoc(path, md);
   }
 
+  // Read the current theme from the store (not the render closure) so the
+  // ⌘⇧L shortcut — bound once in a []-deps effect — always toggles from the
+  // live value rather than a stale one.
   function handleToggleTheme() {
-    const next = theme === "dark" ? "light" : "dark";
+    const next = useAppStore.getState().theme === "dark" ? "light" : "dark";
     useAppStore.getState().setTheme(next);
     applyTheme(next);
   }
 
-  // Placeholder: the full new-document flow is implemented in a later task.
-  function handleNew() {
-    console.log("new");
+  // Create a new untitled document in the current folder and open it. If no
+  // folder is open yet, prompt for one first (cancelling aborts the flow).
+  // The new file is given a unique "Untitled" name so repeated ⌘N never clobbers
+  // an existing file. We re-read the dir after creating so the sidebar updates.
+  async function handleNew() {
+    const content = "# Untitled\n\n";
+    let dir = useAppStore.getState().folder;
+    if (!dir) {
+      const picked = await pickFolder();
+      if (!picked) return;
+      dir = picked;
+      const dirFiles = await readDir(dir);
+      useAppStore.getState().setFolder(dir, dirFiles);
+      // Detach any prior watcher before starting a new one to avoid leaking listeners.
+      unwatchRef.current?.();
+      unwatchRef.current = await startWatching(dir);
+    }
+    const existing = useAppStore.getState().files;
+    const name = nextUntitledName(existing.map((f) => f.name));
+    const newPath = `${dir}/${name}`;
+    await createFile(newPath, content);
+    const refreshed = await readDir(dir);
+    useAppStore.getState().setFiles(refreshed);
+    useAppStore.getState().openDoc(newPath, content);
   }
 
   // Commands surfaced in the ⌘K palette. Static labels are fine for v1.
