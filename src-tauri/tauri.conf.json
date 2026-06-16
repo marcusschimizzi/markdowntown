@@ -16,6 +16,15 @@
         "title": "markdowntown",
         "width": 1000,
         "height": 700
+      },
+      {
+        "label": "settings",
+        "title": "Settings",
+        "url": "/settings.html",
+        "width": 740,
+        "height": 560,
+        "resizable": false,
+        "visible": false
       }
     ],
     "security": {

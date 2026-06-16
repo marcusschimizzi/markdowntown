@@ -16,6 +16,7 @@ import { pickFolder, readDir, readFile } from "./lib/fsBridge";
 import { startWatching } from "./lib/watch";
 import { applyTheme } from "./theme/applyTheme";
 import { wordStats } from "./lib/wordcount";
+import { openSettings } from "./lib/windows";
 
 function App() {
   // Read store values via selectors so the UI re-renders on folder/file/theme changes.
@@ -67,6 +68,9 @@ function App() {
       } else if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === "f") {
         e.preventDefault();
         useAppStore.getState().toggleFocus();
+      } else if ((e.metaKey || e.ctrlKey) && e.key === ",") {
+        e.preventDefault();
+        void openSettings();
       } else if (e.key === "Escape" && useAppStore.getState().ui.paletteOpen) {
         useAppStore.getState().setPalette(false);
       }
@@ -112,6 +116,7 @@ function App() {
     { id: "new", label: "New document", hint: "⌘N", run: () => handleNew() },
     { id: "sidebar", label: "Toggle sidebar", hint: "⌘\\", run: () => useAppStore.getState().toggleSidebar() },
     { id: "open-folder", label: "Open folder", run: () => void handleOpenFolder() },
+    { id: "settings", label: "Settings…", hint: "⌘,", run: () => void openSettings() },
   ];
 
   return (
