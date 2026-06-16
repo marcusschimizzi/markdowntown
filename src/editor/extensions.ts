@@ -3,6 +3,7 @@ import Link from '@tiptap/extension-link';
 import { Markdown } from '@tiptap/markdown';
 import { InputRule } from '@tiptap/core';
 import type { Extensions } from '@tiptap/core';
+import { FocusMode } from './focus';
 
 // [text](url) -> link mark. Link has no built-in input rule, so add one.
 // We use a custom InputRule handler (rather than the generic markInputRule)
@@ -38,4 +39,5 @@ export const extensions: Extensions = [
     indentation: { style: 'space', size: 2 },
     markedOptions: { gfm: true, breaks: false, pedantic: false },
   }),
+  FocusMode,
 ];
