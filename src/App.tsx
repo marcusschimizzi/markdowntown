@@ -1,12 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import type { Editor } from "@tiptap/core";
 import { AppShell } from "./components/AppShell";
 import { Sidebar } from "./components/Sidebar";
+import { Footer } from "./components/Footer";
 import { MarkdownEditor } from "./editor/Editor";
 import { maxWidthFor } from "./editor/width";
 import { useAppStore } from "./state/store";
 import { saveActiveDoc } from "./state/save";
 import { pickFolder, readDir, readFile } from "./lib/fsBridge";
 import { applyTheme } from "./theme/applyTheme";
+import { wordStats } from "./lib/wordcount";
 
 function App() {
   // Read store values via selectors so the UI re-renders on folder/file/theme changes.
@@ -16,6 +19,19 @@ function App() {
   const dirty = useAppStore((s) => s.dirty);
   const theme = useAppStore((s) => s.theme);
   const width = useAppStore((s) => s.settings.width);
+
+  // Hold the editor instance so we can read its rendered (plain) text for word counts.
+  const [editor, setEditor] = useState<Editor | null>(null);
+  const [stats, setStats] = useState({ words: 0, chars: 0, readingMinutes: 1 });
+
+  // Recompute word stats from the editor's RENDERED text so markdown syntax
+  // (#, **, backticks) doesn't inflate counts. React runs child effects before
+  // parent effects, so the editor's own load effect has already applied the new
+  // content by the time this reads getText() — counts stay correct on both edits
+  // and programmatic file switches. activePath in the deps re-runs on file switch.
+  useEffect(() => {
+    if (editor) setStats(wordStats(editor.getText()));
+  }, [editor, markdown, activePath]);
 
   // Global ⌘S / Ctrl+S save shortcut.
   useEffect(() => {
@@ -67,10 +83,12 @@ function App() {
       }
       toolbar={<span style={{ color: "var(--ink2)" }}>Untitled.md</span>}
       footer={
-        <>
-          <span>{dirty ? "Saving…" : "Saved"}</span>
-          <span>Markdown</span>
-        </>
+        <Footer
+          words={stats.words}
+          chars={stats.chars}
+          readingMinutes={stats.readingMinutes}
+          saved={dirty ? "Saving…" : "Saved"}
+        />
       }
     >
       {activePath ? (
@@ -80,6 +98,7 @@ function App() {
               key={activePath}
               markdown={markdown}
               onChange={(md) => useAppStore.getState().setMarkdown(md)}
+              onReady={setEditor}
             />
           </div>
         </div>
