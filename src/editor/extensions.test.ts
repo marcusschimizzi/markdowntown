@@ -1,21 +1,7 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { Editor } from '@tiptap/core';
 import { extensions } from './extensions';
-
-// TipTap input rules fire from real keystrokes via the editor's
-// `handleTextInput` prop, not from a bulk `insertContent` call (which inserts
-// plain text without running input rules synchronously). To exercise the rules
-// in a headless test, we type the body of the markdown syntax and then feed the
-// final trigger character through `handleTextInput` exactly as the browser would.
-function typeWithTrigger(editor: Editor, body: string, trigger: string) {
-  editor.commands.insertContent(body);
-  const pos = editor.state.selection.from;
-  // ProseMirror's handleTextInput signature is (view, from, to, text, default).
-  // The default callback is unused by TipTap's input-rule runner; pass a no-op.
-  editor.view.someProp('handleTextInput', (fn) =>
-    fn(editor.view, pos, pos, trigger, () => editor.state.tr),
-  );
-}
+import { typeWithTrigger } from '../test/typeInEditor';
 
 describe('editor extensions', () => {
   let editor: Editor;
