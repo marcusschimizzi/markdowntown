@@ -19,3 +19,9 @@
 .mde ::selection { background: var(--sel); }
 .editor-scroll { flex: 1; overflow: auto; min-width: 0; position: relative; }
 .editor-column { margin: 0 auto; padding: 48px 32px 160px; }
+
+[data-focus="1"] .mde > * { opacity: .22; transition: opacity .3s ease; filter: saturate(.6); }
+[data-focus="1"] .mde > .activeblk { opacity: 1; filter: none; }
+[data-focus="1"] .editor-column { padding-top: 42vh !important; padding-bottom: 52vh !important; }
+[data-focus="1"] .chromefade { opacity: .32; transition: opacity .3s ease; }
+[data-focus="1"] .chromefade:hover { opacity: 1; }

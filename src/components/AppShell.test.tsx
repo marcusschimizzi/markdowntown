@@ -19,4 +19,18 @@ describe('<AppShell />', () => {
     expect(screen.getByText('EDITOR')).toBeInTheDocument();
     expect(screen.getByText('FOOTER')).toBeInTheDocument();
   });
+
+  it('forwards dataFocus onto the .mdapp root element', () => {
+    const { container } = render(
+      <AppShell
+        sidebar={<div>SIDEBAR</div>}
+        toolbar={<div>TOOLBAR</div>}
+        footer={<div>FOOTER</div>}
+        dataFocus="1"
+      >
+        <div>EDITOR</div>
+      </AppShell>
+    );
+    expect(container.querySelector('.mdapp')).toHaveAttribute('data-focus', '1');
+  });
 });

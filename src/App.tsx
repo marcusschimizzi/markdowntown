@@ -26,6 +26,7 @@ function App() {
   const width = useAppStore((s) => s.settings.width);
   const outlineOpen = useAppStore((s) => s.ui.outlineOpen);
   const paletteOpen = useAppStore((s) => s.ui.paletteOpen);
+  const focus = useAppStore((s) => s.ui.focus);
 
   // Hold the editor instance so we can read its rendered (plain) text for word counts.
   const [editor, setEditor] = useState<Editor | null>(null);
@@ -58,6 +59,9 @@ function App() {
         e.preventDefault();
         const open = useAppStore.getState().ui.paletteOpen;
         useAppStore.getState().setPalette(!open);
+      } else if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === "f") {
+        e.preventDefault();
+        useAppStore.getState().toggleFocus();
       } else if (e.key === "Escape" && useAppStore.getState().ui.paletteOpen) {
         useAppStore.getState().setPalette(false);
       }
@@ -101,6 +105,7 @@ function App() {
 
   return (
     <AppShell
+      dataFocus={focus ? "1" : "0"}
       sidebar={
         <Sidebar
           files={files}
@@ -124,7 +129,7 @@ function App() {
     >
       {activePath ? (
         <>
-          <div className="editor-scroll">
+          <div className="editor-scroll" data-focus={focus ? "1" : "0"}>
             <div className="editor-column" style={{ maxWidth: maxWidthFor(width) }}>
               <MarkdownEditor
                 key={activePath}

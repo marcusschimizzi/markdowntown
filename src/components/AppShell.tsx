@@ -7,11 +7,12 @@ interface Props {
   footer: ReactNode;
   children: ReactNode;
   sidebarOpen?: boolean;
+  dataFocus?: string;
 }
 
-export function AppShell({ sidebar, toolbar, footer, children, sidebarOpen = true }: Props) {
+export function AppShell({ sidebar, toolbar, footer, children, sidebarOpen = true, dataFocus = '0' }: Props) {
   return (
-    <div className="mdapp">
+    <div className="mdapp" data-focus={dataFocus}>
       {sidebarOpen && (
         <aside className="mdapp__sidebar">
           <TrafficLights />
