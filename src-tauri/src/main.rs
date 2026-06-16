@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    mdt_scaffold_lib::run()
+    markdowntown_lib::run()
 }
