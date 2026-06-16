@@ -1,5 +1,5 @@
 import { appConfigDir, join } from '@tauri-apps/api/path';
-import { readDir, readFile, writeFile, createDir } from '../lib/fsBridge';
+import { readDirTree, readFile, writeFile, createDir } from '../lib/fsBridge';
 import { startWatching } from '../lib/watch';
 import { applySettingsToDom } from '../settings/applySettings';
 import { useAppStore } from './store';
@@ -60,8 +60,8 @@ export function initPersistence(): void {
     // Best-effort workspace restore. If the folder/file is gone, start fresh.
     try {
       if (p.folder) {
-        const files = await readDir(p.folder);
-        useAppStore.getState().setFolder(p.folder, files);
+        const tree = await readDirTree(p.folder);
+        useAppStore.getState().setWorkspace(p.folder, tree);
         void startWatching(p.folder);
       }
     } catch (err) {

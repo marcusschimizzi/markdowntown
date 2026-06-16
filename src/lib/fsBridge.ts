@@ -19,3 +19,9 @@ export async function pickFolder(): Promise<string | null> {
   const res = await open({ directory: true, multiple: false });
   return typeof res === 'string' ? res : null;
 }
+
+export async function pickFile(): Promise<string | null> {
+  const res = await open({ directory: false, multiple: false,
+    filters: [{ name: 'Markdown', extensions: ['md', 'markdown'] }] });
+  return typeof res === 'string' ? res : null;
+}

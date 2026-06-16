@@ -5,7 +5,7 @@ const open = vi.fn();
 vi.mock('@tauri-apps/api/core', () => ({ invoke: (...a: unknown[]) => invoke(...a) }));
 vi.mock('@tauri-apps/plugin-dialog', () => ({ open: (...a: unknown[]) => open(...a) }));
 
-import { readDir, readFile, writeFile, pickFolder } from './fsBridge';
+import { readDir, readFile, writeFile, pickFolder, pickFile } from './fsBridge';
 
 beforeEach(() => { invoke.mockReset(); open.mockReset(); });
 
@@ -34,5 +34,17 @@ describe('fsBridge', () => {
     expect(await pickFolder()).toBe('/picked');
     open.mockResolvedValue(null);
     expect(await pickFolder()).toBeNull();
+  });
+
+  it('pickFile opens a file picker with markdown filters and null on cancel', async () => {
+    open.mockResolvedValue('/picked/a.md');
+    expect(await pickFile()).toBe('/picked/a.md');
+    expect(open).toHaveBeenCalledWith({
+      directory: false,
+      multiple: false,
+      filters: [{ name: 'Markdown', extensions: ['md', 'markdown'] }],
+    });
+    open.mockResolvedValue(null);
+    expect(await pickFile()).toBeNull();
   });
 });

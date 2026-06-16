@@ -36,6 +36,7 @@ export interface AppState {
   setFolder(folder: string, files: FileEntry[]): void;
   setFiles(files: FileEntry[]): void;
   setWorkspace(folder: string, tree: TreeNode): void;
+  closeWorkspace(): void;
   openDoc(path: string, markdown: string): void;
   setMarkdown(md: string): void;
   markSaved(): void;
@@ -65,6 +66,8 @@ export const useAppStore = create<AppState>()((set) => ({
   setFolder: (folder, files) => set({ folder, files }),
   setFiles: (files) => set({ files }),
   setWorkspace: (folder, tree) => set({ folder, tree, files: flattenMarkdownFiles(tree) }),
+  closeWorkspace: () =>
+    set({ folder: null, tree: null, files: [], activePath: null, markdown: '', dirty: false }),
   openDoc: (activePath, markdown) => set({ activePath, markdown, dirty: false }),
   setMarkdown: (markdown) => set({ markdown, dirty: true }),
   markSaved: () => set({ dirty: false }),

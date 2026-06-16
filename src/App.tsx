@@ -14,7 +14,7 @@ import { getOutline, jumpToHeading } from "./editor/outline";
 import type { OutlineItem } from "./editor/outline";
 import { useAppStore } from "./state/store";
 import { saveActiveDoc } from "./state/save";
-import { pickFolder, readDirTree, readFile, createFile } from "./lib/fsBridge";
+import { pickFolder, pickFile, readDirTree, readFile, createFile } from "./lib/fsBridge";
 import { baseName } from "./lib/mdFiles";
 import { startWatching } from "./lib/watch";
 import { applyTheme } from "./theme/applyTheme";
@@ -27,6 +27,7 @@ import { applySettingsToDom } from "./settings/applySettings";
 function App() {
   // Read store values via selectors so the UI re-renders on folder/file/theme changes.
   const files = useAppStore((s) => s.files);
+  const folder = useAppStore((s) => s.folder);
   const tree = useAppStore((s) => s.tree);
   const activePath = useAppStore((s) => s.activePath);
   const markdown = useAppStore((s) => s.markdown);
@@ -71,7 +72,8 @@ function App() {
   // stale render values.
   //   ⌘S   save            ⌘N    new document       ⌘\\   toggle sidebar
   //   ⌘K   palette toggle  ⌘⇧L  switch theme        ⌘⌥O  toggle outline
-  //   ⌘⇧F focus mode       ⌘,   settings            Esc   close palette
+  //   ⌘O   open file        ⌘⇧F focus mode          ⌘,   settings
+  //   Esc  close palette
   // ⌘⌥O matches e.code === "KeyO": on macOS, holding Option remaps e.key
   // (Option+O → "ø"), so e.key would never equal "o". The physical-key code is
   // unaffected by Option. The other shortcuts use e.key. ⌘⇧F and ⌘⇧L don't
@@ -85,6 +87,9 @@ function App() {
       } else if (mod && e.key === "n") {
         e.preventDefault();
         void handleNew();
+      } else if (mod && !e.shiftKey && e.key === "o") {
+        e.preventDefault();
+        void handleOpenFile();
       } else if (mod && e.key === "k") {
         e.preventDefault();
         const open = useAppStore.getState().ui.paletteOpen;
@@ -144,6 +149,36 @@ function App() {
     useAppStore.getState().openDoc(path, md);
   }
 
+  // Open a single file via the OS picker. We also set the workspace to the file's
+  // PARENT directory so the sidebar populates and the file is highlighted/auto-
+  // expanded. If the parent can't be read (e.g. permissions), fall back to opening
+  // the file standalone so the editor still works.
+  async function handleOpenFile() {
+    const file = await pickFile();
+    if (!file) return;
+    const md = await readFile(file);
+    const parent = file.slice(0, file.lastIndexOf("/"));
+    try {
+      const tree = await readDirTree(parent);
+      useAppStore.getState().setWorkspace(parent, tree);
+      useAppStore.getState().openDoc(file, md);
+      // Detach any prior watcher before starting a new one to avoid leaking listeners.
+      unwatchRef.current?.();
+      unwatchRef.current = await startWatching(parent);
+    } catch (err) {
+      console.warn("Could not open file's folder", err);
+      useAppStore.getState().openDoc(file, md);
+    }
+  }
+
+  // Close the current folder: stop the fs watcher and reset the workspace so the
+  // sidebar returns to its empty state and the editor clears.
+  function handleCloseFolder() {
+    unwatchRef.current?.();
+    unwatchRef.current = null;
+    useAppStore.getState().closeWorkspace();
+  }
+
   // Read the current theme from the store (not the render closure) so the
   // ⌘⇧L shortcut — bound once in a []-deps effect — always toggles from the
   // live value rather than a stale one.
@@ -187,6 +222,8 @@ function App() {
     { id: "new", label: "New document", hint: "⌘N", run: () => handleNew() },
     { id: "sidebar", label: "Toggle sidebar", hint: "⌘\\", run: () => useAppStore.getState().toggleSidebar() },
     { id: "open-folder", label: "Open folder", run: () => void handleOpenFolder() },
+    { id: "open-file", label: "Open file…", hint: "⌘O", run: () => void handleOpenFile() },
+    { id: "close-folder", label: "Close folder", run: () => handleCloseFolder() },
     { id: "settings", label: "Settings…", hint: "⌘,", run: () => void openSettings() },
   ];
 
@@ -197,9 +234,12 @@ function App() {
       sidebar={
         <Sidebar
           tree={tree}
+          folder={folder}
           activePath={activePath}
           onOpen={handleOpen}
           onOpenFolder={handleOpenFolder}
+          onOpenFile={handleOpenFile}
+          onCloseFolder={handleCloseFolder}
           onNew={handleNew}
           onToggleTheme={handleToggleTheme}
           isDark={theme === "dark"}

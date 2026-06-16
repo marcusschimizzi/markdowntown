@@ -48,6 +48,28 @@ describe('useAppStore', () => {
     expect(paths).toEqual(['/x/a.md', '/x/sub/b.md']);
   });
 
+  it('closes the workspace, clearing folder/tree/files and the active doc', () => {
+    const tree: TreeNode = {
+      name: 'x',
+      path: '/x',
+      isDir: true,
+      children: [{ name: 'a.md', path: '/x/a.md', isDir: false, children: [] }],
+    };
+    useAppStore.getState().setWorkspace('/x', tree);
+    useAppStore.getState().openDoc('/x/a.md', '# A');
+    useAppStore.getState().setMarkdown('# A edited');
+
+    useAppStore.getState().closeWorkspace();
+
+    const s = useAppStore.getState();
+    expect(s.folder).toBeNull();
+    expect(s.tree).toBeNull();
+    expect(s.files).toEqual([]);
+    expect(s.activePath).toBeNull();
+    expect(s.markdown).toBe('');
+    expect(s.dirty).toBe(false);
+  });
+
   it('toggles ui flags', () => {
     const before = useAppStore.getState().ui.outlineOpen;
     useAppStore.getState().toggleOutline();
