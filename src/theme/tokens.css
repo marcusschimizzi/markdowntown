@@ -1,0 +1,18 @@
+/* src/theme/tokens.css */
+:root, [data-theme="light"] {
+  --bg:#fff; --panel:#F6F6F4; --panel2:#FCFCFB; --ink:#1B1D21; --ink2:#2C3035;
+  --muted:#8B9097; --faint:#A8AEB5; --line:rgba(0,0,0,.06); --line2:rgba(0,0,0,.09);
+  --accent:#3B6EDB; --accentSoft:rgba(59,110,219,.10); --accentBorder:rgba(59,110,219,.42);
+  --code:#F1F1EF; --hover:rgba(0,0,0,.045); --sel:rgba(59,110,219,.16); --chip:#F0F0EE;
+}
+[data-theme="dark"] {
+  --bg:#1C1D1F; --panel:#161719; --panel2:#1A1B1D; --ink:#F0F1F3; --ink2:#CDD0D4;
+  --muted:#7C828A; --faint:#5E646B; --line:rgba(255,255,255,.06); --line2:rgba(255,255,255,.08);
+  --accent:#6E9BFF; --accentSoft:rgba(110,155,255,.16); --accentBorder:rgba(110,155,255,.45);
+  --code:rgba(255,255,255,.07); --hover:rgba(255,255,255,.05); --sel:rgba(110,155,255,.26);
+  --chip:rgba(255,255,255,.06);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body, #root { height: 100%; }
+body { background: var(--bg); color: var(--ink);
+  font-family: system-ui, -apple-system, 'SF Pro Text', sans-serif; }
