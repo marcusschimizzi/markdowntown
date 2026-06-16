@@ -15,7 +15,9 @@
         "label": "main",
         "title": "markdowntown",
         "width": 1000,
-        "height": 700
+        "height": 700,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true
       },
       {
         "label": "settings",
