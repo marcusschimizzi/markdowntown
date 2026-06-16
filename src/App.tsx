@@ -8,6 +8,7 @@ import { maxWidthFor } from "./editor/width";
 import { Outline } from "./components/Outline";
 import { CommandPalette } from "./components/CommandPalette";
 import type { Command } from "./components/CommandPalette";
+import { EmptyState } from "./components/EmptyState";
 import { getOutline, jumpToHeading } from "./editor/outline";
 import type { OutlineItem } from "./editor/outline";
 import { useAppStore } from "./state/store";
@@ -179,9 +180,7 @@ function App() {
           )}
         </>
       ) : (
-        <div style={{ flex: 1, padding: "48px 32px", color: "var(--muted)" }}>
-          Open a file to start editing.
-        </div>
+        <EmptyState onNew={handleNew} />
       )}
       {paletteOpen && (
         <CommandPalette
