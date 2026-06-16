@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Editor } from "@tiptap/core";
 import { AppShell } from "./components/AppShell";
 import { Sidebar } from "./components/Sidebar";
+import { Toolbar } from "./components/Toolbar";
 import { Footer } from "./components/Footer";
 import { MarkdownEditor } from "./editor/Editor";
 import { maxWidthFor } from "./editor/width";
@@ -14,6 +15,7 @@ import type { OutlineItem } from "./editor/outline";
 import { useAppStore } from "./state/store";
 import { saveActiveDoc } from "./state/save";
 import { pickFolder, readDir, readFile, createFile } from "./lib/fsBridge";
+import { baseName } from "./lib/mdFiles";
 import { startWatching } from "./lib/watch";
 import { applyTheme } from "./theme/applyTheme";
 import { nextUntitledName } from "./state/newDoc";
@@ -33,6 +35,10 @@ function App() {
   const outlineOpen = useAppStore((s) => s.ui.outlineOpen);
   const paletteOpen = useAppStore((s) => s.ui.paletteOpen);
   const focus = useAppStore((s) => s.ui.focus);
+  const sidebarOpen = useAppStore((s) => s.ui.sidebarOpen);
+  const toggleSidebar = useAppStore((s) => s.toggleSidebar);
+  const toggleOutline = useAppStore((s) => s.toggleOutline);
+  const toggleFocus = useAppStore((s) => s.toggleFocus);
 
   // Hold the editor instance so we can read its rendered (plain) text for word counts.
   const [editor, setEditor] = useState<Editor | null>(null);
@@ -186,6 +192,7 @@ function App() {
   return (
     <AppShell
       dataFocus={focus ? "1" : "0"}
+      sidebarOpen={sidebarOpen}
       sidebar={
         <Sidebar
           files={files}
@@ -197,7 +204,16 @@ function App() {
           isDark={theme === "dark"}
         />
       }
-      toolbar={<span style={{ color: "var(--ink2)" }}>Untitled.md</span>}
+      toolbar={
+        <Toolbar
+          activeName={activePath ? baseName(activePath) : "Untitled"}
+          outlineOpen={outlineOpen}
+          focus={focus}
+          onToggleSidebar={toggleSidebar}
+          onToggleOutline={toggleOutline}
+          onToggleFocus={toggleFocus}
+        />
+      }
       footer={
         <Footer
           words={stats.words}

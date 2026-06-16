@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { SettingsApp } from "./SettingsApp";
 import { broadcastSettings } from "./settingsBridge";
@@ -17,8 +17,12 @@ function SettingsRoot() {
   // Seed from the store's default Settings (persistence/seeding is Task 28).
   const [settings, setSettings] = useState<Settings>(() => useAppStore.getState().settings);
 
-  // Theme the settings window itself with the current settings.
-  applySettingsToDom(settings);
+  // Theme the settings window itself with the current settings. Run as an
+  // effect (not during render) so it's a post-commit side effect; re-applies
+  // whenever the settings change.
+  useEffect(() => {
+    applySettingsToDom(settings);
+  }, [settings]);
 
   return (
     <SettingsApp
