@@ -1,0 +1,3 @@
+.filetree__dir { color: var(--muted); }
+.filetree__chevron { flex: none; color: var(--faint); transition: transform .12s ease; }
+.filetree__chevron.is-open { transform: rotate(90deg); }

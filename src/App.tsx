@@ -14,7 +14,7 @@ import { getOutline, jumpToHeading } from "./editor/outline";
 import type { OutlineItem } from "./editor/outline";
 import { useAppStore } from "./state/store";
 import { saveActiveDoc } from "./state/save";
-import { pickFolder, readDir, readFile, createFile } from "./lib/fsBridge";
+import { pickFolder, readDirTree, readFile, createFile } from "./lib/fsBridge";
 import { baseName } from "./lib/mdFiles";
 import { startWatching } from "./lib/watch";
 import { applyTheme } from "./theme/applyTheme";
@@ -27,6 +27,7 @@ import { applySettingsToDom } from "./settings/applySettings";
 function App() {
   // Read store values via selectors so the UI re-renders on folder/file/theme changes.
   const files = useAppStore((s) => s.files);
+  const tree = useAppStore((s) => s.tree);
   const activePath = useAppStore((s) => s.activePath);
   const markdown = useAppStore((s) => s.markdown);
   const dirty = useAppStore((s) => s.dirty);
@@ -131,8 +132,8 @@ function App() {
   async function handleOpenFolder() {
     const folder = await pickFolder();
     if (!folder) return;
-    const dirFiles = await readDir(folder);
-    useAppStore.getState().setFolder(folder, dirFiles);
+    const dirTree = await readDirTree(folder);
+    useAppStore.getState().setWorkspace(folder, dirTree);
     // Detach any prior watcher before starting a new one to avoid leaking listeners.
     unwatchRef.current?.();
     unwatchRef.current = await startWatching(folder);
@@ -163,8 +164,8 @@ function App() {
       const picked = await pickFolder();
       if (!picked) return;
       dir = picked;
-      const dirFiles = await readDir(dir);
-      useAppStore.getState().setFolder(dir, dirFiles);
+      const dirTree = await readDirTree(dir);
+      useAppStore.getState().setWorkspace(dir, dirTree);
       // Detach any prior watcher before starting a new one to avoid leaking listeners.
       unwatchRef.current?.();
       unwatchRef.current = await startWatching(dir);
@@ -173,8 +174,8 @@ function App() {
     const name = nextUntitledName(existing.map((f) => f.name));
     const newPath = `${dir}/${name}`;
     await createFile(newPath, content);
-    const refreshed = await readDir(dir);
-    useAppStore.getState().setFiles(refreshed);
+    const refreshed = await readDirTree(dir);
+    useAppStore.getState().setWorkspace(dir, refreshed);
     useAppStore.getState().openDoc(newPath, content);
   }
 
@@ -195,7 +196,7 @@ function App() {
       sidebarOpen={sidebarOpen}
       sidebar={
         <Sidebar
-          files={files}
+          tree={tree}
           activePath={activePath}
           onOpen={handleOpen}
           onOpenFolder={handleOpenFolder}
