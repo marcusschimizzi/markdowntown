@@ -5,6 +5,9 @@ import { Sidebar } from "./components/Sidebar";
 import { Footer } from "./components/Footer";
 import { MarkdownEditor } from "./editor/Editor";
 import { maxWidthFor } from "./editor/width";
+import { Outline } from "./components/Outline";
+import { getOutline, jumpToHeading } from "./editor/outline";
+import type { OutlineItem } from "./editor/outline";
 import { useAppStore } from "./state/store";
 import { saveActiveDoc } from "./state/save";
 import { pickFolder, readDir, readFile } from "./lib/fsBridge";
@@ -19,10 +22,12 @@ function App() {
   const dirty = useAppStore((s) => s.dirty);
   const theme = useAppStore((s) => s.theme);
   const width = useAppStore((s) => s.settings.width);
+  const outlineOpen = useAppStore((s) => s.ui.outlineOpen);
 
   // Hold the editor instance so we can read its rendered (plain) text for word counts.
   const [editor, setEditor] = useState<Editor | null>(null);
   const [stats, setStats] = useState({ words: 0, chars: 0, readingMinutes: 1 });
+  const [outline, setOutline] = useState<OutlineItem[]>([]);
 
   // Recompute word stats from the editor's RENDERED text so markdown syntax
   // (#, **, backticks) doesn't inflate counts. React runs child effects before
@@ -31,6 +36,13 @@ function App() {
   // and programmatic file switches. activePath in the deps re-runs on file switch.
   useEffect(() => {
     if (editor) setStats(wordStats(editor.getText()));
+  }, [editor, markdown, activePath]);
+
+  // Recompute the outline reactively from the editor doc. Same timing rationale as
+  // the word-count effect above: the editor's load effect runs first, so getOutline
+  // reads the up-to-date doc on edits and file switches.
+  useEffect(() => {
+    if (editor) setOutline(getOutline(editor));
   }, [editor, markdown, activePath]);
 
   // Global ⌘S / Ctrl+S save shortcut.
@@ -92,16 +104,25 @@ function App() {
       }
     >
       {activePath ? (
-        <div className="editor-scroll">
-          <div className="editor-column" style={{ maxWidth: maxWidthFor(width) }}>
-            <MarkdownEditor
-              key={activePath}
-              markdown={markdown}
-              onChange={(md) => useAppStore.getState().setMarkdown(md)}
-              onReady={setEditor}
-            />
+        <>
+          <div className="editor-scroll">
+            <div className="editor-column" style={{ maxWidth: maxWidthFor(width) }}>
+              <MarkdownEditor
+                key={activePath}
+                markdown={markdown}
+                onChange={(md) => useAppStore.getState().setMarkdown(md)}
+                onReady={setEditor}
+              />
+            </div>
           </div>
-        </div>
+          {outlineOpen && (
+            <Outline
+              items={outline}
+              activeIndex={0}
+              onJump={(pos) => editor && jumpToHeading(editor, pos)}
+            />
+          )}
+        </>
       ) : (
         <div style={{ flex: 1, padding: "48px 32px", color: "var(--muted)" }}>
           Open a file to start editing.
