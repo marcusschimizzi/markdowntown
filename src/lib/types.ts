@@ -3,3 +3,10 @@ export interface FileEntry {
   path: string;
   isDir: boolean;
 }
+
+export interface TreeNode {
+  name: string;
+  path: string;
+  isDir: boolean;
+  children: TreeNode[];
+}

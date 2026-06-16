@@ -1,8 +1,9 @@
 import { invoke } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
-import type { FileEntry } from './types';
+import type { FileEntry, TreeNode } from './types';
 
 export const readDir = (path: string) => invoke<FileEntry[]>('read_dir', { path });
+export const readDirTree = (path: string) => invoke<TreeNode>('read_dir_tree', { path });
 export const readFile = (path: string) => invoke<string>('read_file', { path });
 export const writeFile = (path: string, contents: string) =>
   invoke<void>('write_file', { path, contents });

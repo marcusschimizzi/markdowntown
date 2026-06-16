@@ -13,6 +13,7 @@ pub fn run() {
             fs_commands::create_file,
             fs_commands::create_dir,
             fs_commands::read_dir,
+            fs_commands::read_dir_tree,
             fs_commands::rename_path,
             fs_commands::delete_path,
             watcher::watch_dir,

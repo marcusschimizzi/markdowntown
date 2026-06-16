@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import type { FileEntry } from '../lib/types';
+import type { FileEntry, TreeNode } from '../lib/types';
+import { flattenMarkdownFiles } from '../lib/tree';
 
 export type ResolvedTheme = 'light' | 'dark';
 export type ThemePref = 'light' | 'dark' | 'system';
@@ -24,6 +25,7 @@ export interface UiState {
 export interface AppState {
   folder: string | null;
   files: FileEntry[];
+  tree: TreeNode | null;
   activePath: string | null;
   markdown: string;
   dirty: boolean;
@@ -33,6 +35,7 @@ export interface AppState {
 
   setFolder(folder: string, files: FileEntry[]): void;
   setFiles(files: FileEntry[]): void;
+  setWorkspace(folder: string, tree: TreeNode): void;
   openDoc(path: string, markdown: string): void;
   setMarkdown(md: string): void;
   markSaved(): void;
@@ -51,6 +54,7 @@ const defaultSettings: Settings = {
 export const useAppStore = create<AppState>()((set) => ({
   folder: null,
   files: [],
+  tree: null,
   activePath: null,
   markdown: '',
   dirty: false,
@@ -60,6 +64,7 @@ export const useAppStore = create<AppState>()((set) => ({
 
   setFolder: (folder, files) => set({ folder, files }),
   setFiles: (files) => set({ files }),
+  setWorkspace: (folder, tree) => set({ folder, tree, files: flattenMarkdownFiles(tree) }),
   openDoc: (activePath, markdown) => set({ activePath, markdown, dirty: false }),
   setMarkdown: (markdown) => set({ markdown, dirty: true }),
   markSaved: () => set({ dirty: false }),
