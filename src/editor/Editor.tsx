@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import { extensions } from './extensions';
 import { loadMarkdown, serializeMarkdown } from './markdown';
 import type { Editor } from '@tiptap/core';
+import './editor.css';
 
 interface Props {
   markdown: string;

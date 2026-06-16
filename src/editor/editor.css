@@ -1,0 +1,21 @@
+/* src/editor/editor.css */
+.mde { outline: none; min-height: 60vh; caret-color: var(--accent); }
+.mde:focus { outline: none; }
+.mde h1 { font: 680 31px/1.18 system-ui; letter-spacing: -.028em; color: var(--ink); margin: 0 0 6px; }
+.mde h2 { font: 640 21px/1.3 system-ui; letter-spacing: -.012em; color: var(--ink); margin: 30px 0 12px; }
+.mde h3 { font: 620 17px/1.4 system-ui; color: var(--ink); margin: 24px 0 8px; }
+.mde p { font: 400 17px/1.78 system-ui; color: var(--ink2); margin: 0 0 18px; text-wrap: pretty; }
+.mde ul { margin: 0 0 18px; padding-left: 24px; color: var(--ink2); font: 400 17px/1.85 system-ui; }
+.mde li { margin: 2px 0; }
+.mde blockquote { margin: 0 0 18px; padding: 3px 0 3px 18px; border-left: 3px solid var(--accentBorder);
+  font: italic 400 17px/1.7 system-ui; color: var(--muted); }
+.mde a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accentBorder); }
+.mde code { font: 400 14px/1 'JetBrains Mono', monospace; background: var(--code);
+  padding: 2.5px 6px; border-radius: 5px; color: var(--ink2); }
+.mde pre { background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+  padding: 15px 18px; font: 400 13.5px/1.7 'JetBrains Mono', monospace; color: var(--muted);
+  white-space: pre-wrap; margin: 0 0 18px; }
+.mde strong, .mde b { font-weight: 650; color: var(--ink); }
+.mde ::selection { background: var(--sel); }
+.editor-scroll { flex: 1; overflow: auto; min-width: 0; position: relative; }
+.editor-column { margin: 0 auto; padding: 48px 32px 160px; }

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { AppShell } from "./components/AppShell";
 import { Sidebar } from "./components/Sidebar";
 import { MarkdownEditor } from "./editor/Editor";
+import { maxWidthFor } from "./editor/width";
 import { useAppStore } from "./state/store";
 import { saveActiveDoc } from "./state/save";
 import { pickFolder, readDir, readFile } from "./lib/fsBridge";
@@ -14,6 +15,7 @@ function App() {
   const markdown = useAppStore((s) => s.markdown);
   const dirty = useAppStore((s) => s.dirty);
   const theme = useAppStore((s) => s.theme);
+  const width = useAppStore((s) => s.settings.width);
 
   // Global ⌘S / Ctrl+S save shortcut.
   useEffect(() => {
@@ -72,11 +74,15 @@ function App() {
       }
     >
       {activePath ? (
-        <MarkdownEditor
-          key={activePath}
-          markdown={markdown}
-          onChange={(md) => useAppStore.getState().setMarkdown(md)}
-        />
+        <div className="editor-scroll">
+          <div className="editor-column" style={{ maxWidth: maxWidthFor(width) }}>
+            <MarkdownEditor
+              key={activePath}
+              markdown={markdown}
+              onChange={(md) => useAppStore.getState().setMarkdown(md)}
+            />
+          </div>
+        </div>
       ) : (
         <div style={{ flex: 1, padding: "48px 32px", color: "var(--muted)" }}>
           Open a file to start editing.
