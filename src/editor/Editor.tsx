@@ -17,7 +17,11 @@ export function MarkdownEditor({ markdown, onChange, onReady }: Props) {
     immediatelyRender: false,
     autofocus: true,
     editorProps: { attributes: { role: 'textbox', 'aria-multiline': 'true', class: 'mde' } },
-    onUpdate: ({ editor }) => onChange(serializeMarkdown(editor)),
+    onUpdate: ({ editor }) => {
+      const md = serializeMarkdown(editor);
+      loadedFor.current = md; // prevents the controlled prop feedback from triggering a reload
+      onChange(md);
+    },
   });
 
   // Load markdown when the editor is ready or the source doc changes.
