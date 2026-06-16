@@ -6,6 +6,8 @@ import { Footer } from "./components/Footer";
 import { MarkdownEditor } from "./editor/Editor";
 import { maxWidthFor } from "./editor/width";
 import { Outline } from "./components/Outline";
+import { CommandPalette } from "./components/CommandPalette";
+import type { Command } from "./components/CommandPalette";
 import { getOutline, jumpToHeading } from "./editor/outline";
 import type { OutlineItem } from "./editor/outline";
 import { useAppStore } from "./state/store";
@@ -23,6 +25,7 @@ function App() {
   const theme = useAppStore((s) => s.theme);
   const width = useAppStore((s) => s.settings.width);
   const outlineOpen = useAppStore((s) => s.ui.outlineOpen);
+  const paletteOpen = useAppStore((s) => s.ui.paletteOpen);
 
   // Hold the editor instance so we can read its rendered (plain) text for word counts.
   const [editor, setEditor] = useState<Editor | null>(null);
@@ -45,12 +48,18 @@ function App() {
     if (editor) setOutline(getOutline(editor));
   }, [editor, markdown, activePath]);
 
-  // Global ⌘S / Ctrl+S save shortcut.
+  // Global keyboard shortcuts: ⌘S save, ⌘K palette toggle, Esc closes palette.
   useEffect(() => {
     function handleKeydown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === "s") {
         e.preventDefault();
         void saveActiveDoc();
+      } else if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        const open = useAppStore.getState().ui.paletteOpen;
+        useAppStore.getState().setPalette(!open);
+      } else if (e.key === "Escape" && useAppStore.getState().ui.paletteOpen) {
+        useAppStore.getState().setPalette(false);
       }
     }
     window.addEventListener("keydown", handleKeydown);
@@ -79,6 +88,16 @@ function App() {
   function handleNew() {
     console.log("new");
   }
+
+  // Commands surfaced in the ⌘K palette. Static labels are fine for v1.
+  const commands: Command[] = [
+    { id: "outline", label: "Toggle outline", hint: "⌘⌥O", run: () => useAppStore.getState().toggleOutline() },
+    { id: "theme", label: "Switch theme", hint: "⌘⇧L", run: () => handleToggleTheme() },
+    { id: "focus", label: "Toggle focus mode", hint: "⌘⇧F", run: () => useAppStore.getState().toggleFocus() },
+    { id: "new", label: "New document", hint: "⌘N", run: () => handleNew() },
+    { id: "sidebar", label: "Toggle sidebar", hint: "⌘\\", run: () => useAppStore.getState().toggleSidebar() },
+    { id: "open-folder", label: "Open folder", run: () => void handleOpenFolder() },
+  ];
 
   return (
     <AppShell
@@ -127,6 +146,14 @@ function App() {
         <div style={{ flex: 1, padding: "48px 32px", color: "var(--muted)" }}>
           Open a file to start editing.
         </div>
+      )}
+      {paletteOpen && (
+        <CommandPalette
+          files={files}
+          commands={commands}
+          onOpenFile={(path) => handleOpen(path)}
+          onClose={() => useAppStore.getState().setPalette(false)}
+        />
       )}
     </AppShell>
   );

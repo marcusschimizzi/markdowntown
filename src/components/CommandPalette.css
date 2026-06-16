@@ -1,0 +1,18 @@
+.palette__scrim { position: fixed; inset: 0; background: rgba(10,10,12,.42);
+  display: flex; justify-content: center; align-items: flex-start; z-index: 50; }
+.palette { margin-top: 118px; width: 620px; max-width: 90vw; background: var(--bg);
+  border: 1px solid var(--line2); border-radius: 14px;
+  box-shadow: 0 32px 70px -18px rgba(0,0,0,.5); overflow: hidden; }
+.palette__head { display: flex; align-items: center; gap: 12px; padding: 15px 18px;
+  border-bottom: 1px solid var(--line); }
+.palette__input { flex: 1; border: none; outline: none; background: transparent;
+  font: 400 16px/1 system-ui; color: var(--ink); }
+.palette__esc { font: 500 11px/1 system-ui; color: var(--muted);
+  border: 1px solid var(--line2); border-radius: 5px; padding: 3px 7px; }
+.palette__results { padding: 8px; max-height: 340px; overflow: auto; }
+.palette__group { padding: 8px 10px 4px; font: 600 10.5px/1 system-ui; letter-spacing: .1em; color: var(--muted); }
+.palette__row { display: flex; align-items: center; gap: 11px; height: 40px; padding: 0 12px;
+  border-radius: 9px; cursor: pointer; color: var(--ink2); font: 480 14px/1 system-ui; }
+.palette__row:hover { background: var(--hover); }
+.palette__hint { margin-left: auto; font: 500 11px/1 system-ui; color: var(--muted); }
+.palette__empty { padding: 18px; text-align: center; font: 400 14px/1 system-ui; color: var(--muted); }
