@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Editor } from "@tiptap/core";
 import { AppShell } from "./components/AppShell";
 import { Sidebar } from "./components/Sidebar";
@@ -13,6 +13,7 @@ import type { OutlineItem } from "./editor/outline";
 import { useAppStore } from "./state/store";
 import { saveActiveDoc } from "./state/save";
 import { pickFolder, readDir, readFile } from "./lib/fsBridge";
+import { startWatching } from "./lib/watch";
 import { applyTheme } from "./theme/applyTheme";
 import { wordStats } from "./lib/wordcount";
 
@@ -30,6 +31,10 @@ function App() {
 
   // Hold the editor instance so we can read its rendered (plain) text for word counts.
   const [editor, setEditor] = useState<Editor | null>(null);
+
+  // Hold the current fs-change unlisten so we can detach the previous watcher
+  // before starting a new one (on re-open) and on unmount — avoids leaking listeners.
+  const unwatchRef = useRef<(() => void) | null>(null);
   const [stats, setStats] = useState({ words: 0, chars: 0, readingMinutes: 1 });
   const [outline, setOutline] = useState<OutlineItem[]>([]);
 
@@ -70,11 +75,17 @@ function App() {
     return () => window.removeEventListener("keydown", handleKeydown);
   }, []);
 
+  // Detach the active fs-change watcher when the app unmounts.
+  useEffect(() => () => unwatchRef.current?.(), []);
+
   async function handleOpenFolder() {
     const folder = await pickFolder();
     if (!folder) return;
     const dirFiles = await readDir(folder);
     useAppStore.getState().setFolder(folder, dirFiles);
+    // Detach any prior watcher before starting a new one to avoid leaking listeners.
+    unwatchRef.current?.();
+    unwatchRef.current = await startWatching(folder);
   }
 
   async function handleOpen(path: string) {
