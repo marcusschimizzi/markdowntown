@@ -48,6 +48,8 @@ pub fn watch_dir(
     debouncer
         .watch(Path::new(&path), RecursiveMode::NonRecursive)
         .map_err(|e| e.to_string())?;
-    *state.0.lock().unwrap() = Some(debouncer); // keep alive; replaces previous
+    if let Ok(mut guard) = state.0.lock() {
+        *guard = Some(debouncer); // keep alive; replaces previous
+    }
     Ok(())
 }

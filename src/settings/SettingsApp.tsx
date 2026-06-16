@@ -1,4 +1,4 @@
-import type { Settings, ThemePref, EditorFont } from '../state/store';
+import type { Settings, ThemePref, EditorFont, Width } from '../state/store';
 import './SettingsApp.css';
 
 interface Props {
@@ -18,6 +18,12 @@ const FONTS: { value: EditorFont; sample: string; label: string; sampleStyle: Re
   { value: 'mono', sample: 'Writing', label: 'Mono · JetBrains', sampleStyle: { fontFamily: "'JetBrains Mono', monospace", fontWeight: 400 } },
 ];
 
+const WIDTHS: { value: Width; label: string }[] = [
+  { value: 'narrow', label: 'Narrow' },
+  { value: 'normal', label: 'Normal' },
+  { value: 'wide', label: 'Wide' },
+];
+
 const ACCENTS = ['#3B6EDB', '#B45B36', '#1F8A5B', '#7A5AF5', '#5A6068'];
 
 export function SettingsApp({ settings, onChange }: Props) {
@@ -34,6 +40,21 @@ export function SettingsApp({ settings, onChange }: Props) {
             onClick={() => onChange({ themePref: t.value })}
           >
             {t.label}
+          </button>
+        ))}
+      </div>
+
+      <h2 className="settings__label">WIDTH</h2>
+      <div className="settings__segmented" role="group" aria-label="Width">
+        {WIDTHS.map((w) => (
+          <button
+            key={w.value}
+            type="button"
+            className={`settings__seg${settings.width === w.value ? ' is-active' : ''}`}
+            aria-pressed={settings.width === w.value}
+            onClick={() => onChange({ width: w.value })}
+          >
+            {w.label}
           </button>
         ))}
       </div>

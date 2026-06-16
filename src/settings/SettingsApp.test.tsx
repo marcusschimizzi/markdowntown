@@ -16,4 +16,11 @@ describe('<SettingsApp />', () => {
     fireEvent.click(screen.getByText('Dark'));
     expect(onChange).toHaveBeenCalledWith({ themePref: 'dark' });
   });
+
+  it('emits a width change when Wide is chosen', () => {
+    const onChange = vi.fn();
+    render(<SettingsApp settings={{ themePref: 'light', font: 'sans', fontSize: 17, accent: '#3B6EDB', width: 'normal' }} onChange={onChange} />);
+    fireEvent.click(screen.getByText('Wide'));
+    expect(onChange).toHaveBeenCalledWith({ width: 'wide' });
+  });
 });
