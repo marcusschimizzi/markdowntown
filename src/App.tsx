@@ -17,6 +17,8 @@ import { startWatching } from "./lib/watch";
 import { applyTheme } from "./theme/applyTheme";
 import { wordStats } from "./lib/wordcount";
 import { openSettings } from "./lib/windows";
+import { onSettingsChanged } from "./settings/settingsBridge";
+import { applySettingsToDom } from "./settings/applySettings";
 
 function App() {
   // Read store values via selectors so the UI re-renders on folder/file/theme changes.
@@ -81,6 +83,19 @@ function App() {
 
   // Detach the active fs-change watcher when the app unmounts.
   useEffect(() => () => unwatchRef.current?.(), []);
+
+  // Apply current settings once on mount, then subscribe to live changes
+  // broadcast from the Settings window and re-apply them to the editor DOM.
+  useEffect(() => {
+    applySettingsToDom(useAppStore.getState().settings);
+    const unlistenPromise = onSettingsChanged((p) => {
+      useAppStore.getState().applySettings(p);
+      applySettingsToDom(useAppStore.getState().settings);
+    });
+    return () => {
+      void unlistenPromise.then((unlisten) => unlisten());
+    };
+  }, []);
 
   async function handleOpenFolder() {
     const folder = await pickFolder();
