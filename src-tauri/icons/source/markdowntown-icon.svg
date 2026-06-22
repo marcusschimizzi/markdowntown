@@ -1,0 +1,38 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- frame -->
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="#3b6edb"/>
+  <!-- folded page -->
+  <path d="M116 100 H334 L396 162 V412 H116 Z" fill="#fbf7ef"/>
+  <path d="M334 100 L396 162 H334 Z" fill="#d9d4ca"/>
+  <!-- two-line header -->
+  <rect x="150" y="146" width="118" height="13" rx="6.5" fill="#cdd0d4"/>
+  <rect x="150" y="174" width="86" height="9" rx="4.5" fill="#e0ddd4"/>
+  <!-- back row (depth) -->
+  <g fill="#9bb8f2">
+    <rect x="166" y="256" width="56" height="130"/>
+    <rect x="252" y="236" width="60" height="150"/>
+    <rect x="318" y="280" width="42" height="106"/>
+  </g>
+  <!-- front building 1 (cobalt) + windows -->
+  <rect x="148" y="304" width="52" height="82" fill="#3b6edb"/>
+  <g fill="#fbf7ef">
+    <rect x="158" y="316" width="11" height="11"/><rect x="177" y="316" width="11" height="11"/>
+    <rect x="158" y="338" width="11" height="11"/><rect x="177" y="338" width="11" height="11"/>
+  </g>
+  <!-- hero tower (terracotta) + windows -->
+  <rect x="210" y="266" width="58" height="120" fill="#b45b36"/>
+  <g fill="#fbf7ef">
+    <rect x="220" y="280" width="12" height="12"/><rect x="244" y="280" width="12" height="12"/>
+    <rect x="220" y="306" width="12" height="12"/><rect x="244" y="306" width="12" height="12"/>
+    <rect x="220" y="332" width="12" height="12"/><rect x="244" y="332" width="12" height="12"/>
+  </g>
+  <!-- front building 3 (cobalt) + antenna + windows -->
+  <rect x="278" y="242" width="50" height="144" fill="#3b6edb"/>
+  <rect x="300" y="206" width="4" height="36" fill="#1c1d1f"/>
+  <circle cx="302" cy="204" r="6" fill="#b45b36"/>
+  <g fill="#fbf7ef">
+    <rect x="287" y="258" width="11" height="11"/><rect x="306" y="258" width="11" height="11"/>
+    <rect x="287" y="280" width="11" height="11"/><rect x="306" y="280" width="11" height="11"/>
+    <rect x="287" y="302" width="11" height="11"/><rect x="306" y="302" width="11" height="11"/>
+  </g>
+</svg>
