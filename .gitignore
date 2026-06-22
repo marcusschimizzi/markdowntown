@@ -26,3 +26,6 @@ dist-ssr
 # Tauri / Rust
 src-tauri/target
 src-tauri/gen/schemas
+
+# Brainstorming visual-companion scratch
+.superpowers/
