@@ -29,3 +29,7 @@ src-tauri/gen/schemas
 
 # Brainstorming visual-companion scratch
 .superpowers/
+
+# AI process docs & design handoff scratch (kept local, not published)
+docs/superpowers/
+design/minimal-markdown-editor/
