@@ -6,6 +6,8 @@
 
 **A calm, Typora-style markdown editor for your desktop.**
 
+[![CI](https://github.com/marcusschimizzi/markdowntown/actions/workflows/ci.yml/badge.svg)](https://github.com/marcusschimizzi/markdowntown/actions/workflows/ci.yml)
+
 Write and preview Markdown in a single distraction-free surface — no split panes, no raw-syntax clutter. Markdowntown edits real `.md` files on disk, so your notes stay plain, portable, and yours.
 
 </div>
